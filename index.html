@@ -3,831 +3,2238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trance Studio - Ultimate Edition</title>
+    <title>Gemini 3.1 Pro Preview - Chat Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ==========================================================================
+           1. CSS Variables & Theming
+           ========================================================================== */
         :root {
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --neon-green: #00ff88;
-            --bg-dark: #050505;
-            --panel-bg: #11111b;
+            /* Light Theme Colors */
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff;
+            --bg-chat: #ffffff;
+            --bg-input: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #65676b;
+            --accent-color: #0b57d0;
+            --accent-hover: #0842a0;
+            --border-color: #e5e5e5;
+            --message-user-bg: #e3f2fd;
+            --message-user-text: #000000;
+            --message-bot-bg: #ffffff;
+            --message-bot-text: #1a1a1a;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --code-header: #2d2d2d;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 20px;
+            --font-family: 'Heebo', sans-serif;
+        } {
+            /* Dark Theme Colors */
+            --bg-main: #121212;
+            --bg-sidebar: #1e1e1e;
+            --bg-chat: #121212;
+            --bg-input: #1e1e1e;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --accent-color: #8ab4f8;
+            --accent-hover: #aecbfa;
+            --border-color: #393a3b;
+            --message-user-bg: #004a77;
+            --message-user-text: #ffffff;
+            --message-bot-bg: #1e1e1e;
+            --message-bot-text: #e4e6eb;
+            --code-bg: #000000;
+            --code-text: #e4e6eb;
+            --code-header: #1a1a1a;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
+        }
+
+        /* ==========================================================================
+           2. Reset & Global Styles
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: #fff;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            margin: 0;
-            overflow-x: hidden;
+            font-family: var(--font-family);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            overflow: hidden;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
         }
 
-        .studio-container {
-            width: 95%;
-            max-width: 1400px;
-            background: var(--panel-bg);
-            margin: 20px;
-            padding: 30px;
-            border-radius: 24px;
-            border: 1px solid #333;
-            box-shadow: 0 0 80px rgba(188, 19, 254, 0.15);
-        }
-
-        header { text-align: center; margin-bottom: 30px; }
-        
-        h1 {
-            font-size: 3rem;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            text-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-        }
-
-        .controls-grid {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .sidebar {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #333;
-        }
-
-        .main-display {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        button {
+            font-family: var(--font-family);
+            cursor: pointer;
+            border: none;
+            background: none;
+            outline: none;
+            color: inherit;
         }
 
         input, textarea, select {
-            background: #08080c;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            transition: 0.3s;
+            font-family: var(--font-family);
+            outline: none;
         }
 
-        input:focus, textarea:focus { border-color: var(--neon-blue); outline: none; }
-
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            font-size: 0.8rem;
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
         }
 
-        .btn-gen { background: linear-gradient(45deg, var(--neon-blue), #00aaff); color: #000; }
-        .btn-stop { background: #ff3333; color: #fff; }
-        .btn-fx { background: #222; border: 1px solid #444; color: #aaa; }
-        .btn-fx.active { border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
-
-        button:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.2); }
-        button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .visualizer-container {
-            position: relative;
-            background: #000;
-            border-radius: 12px;
-            border: 1px solid #333;
-            height: 250px;
-            overflow: hidden;
+        a:hover {
+            text-decoration: underline;
         }
 
-        canvas { width: 100%; height: 100%; }
-
-        .track-status {
-            position: absolute;
-            top: 10px; right: 10px;
-            font-family: monospace;
-            background: rgba(0,0,0,0.7);
-            padding: 5px 10px;
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(150, 150, 150, 0.5);
             border-radius: 4px;
-            color: var(--neon-green);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(150, 150, 150, 0.8);
         }
 
-        .channels-rack {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            background: #0a0a0f;
-            padding: 15px;
-            border-radius: 12px;
+        /* ==========================================================================
+           3. Layout Structure
+           ========================================================================== */
+        #app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
         }
 
-        .channel-strip {
-            background: #15151a;
-            border-radius: 6px;
+        /* --- Sidebar --- */
+        #sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-inline-end: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, width 0.3s ease;
+            z-index: 100;
+        }
+
+        #sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #new-chat-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        #new-chat-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        #new-chat-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        #chat-list {
+            flex: 1;
+            overflow-y: auto;
             padding: 10px;
-            text-align: center;
-            border-bottom: 2px solid #333;
-            transition: 0.1s;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
-        
-        .channel-strip.active { border-bottom-color: var(--neon-blue); background: #1a1a25; transform: scale(1.05); }
 
-        .vu-meter {
-            width: 6px;
-            height: 40px;
-            background: #222;
-            margin: 5px auto;
-            border-radius: 3px;
+        .chat-list-item {
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+            color: var(--text-primary);
+        }
+
+        .chat-list-item:hover {
+            background-color: var(--border-color);
+        }
+
+        .chat-list-item.active {
+            background-color: rgba(11, 87, 208, 0.1);
+            border-right: 4px solid var(--accent-color);
+            font-weight: 600;
+        } .chat-list-item.active {
+            background-color: rgba(138, 180, 248, 0.1);
+        }
+
+        .chat-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .chat-actions {
+            display: none;
+            gap: 5px;
+        }
+
+        .chat-list-item:hover .chat-actions {
+            display: flex;
+        }
+
+        .action-icon {
+            width: 16px;
+            height: 16px;
+            fill: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .action-icon:hover {
+            fill: var(--accent-color);
+        }
+
+        .action-icon.delete:hover {
+            fill: var(--error-color);
+        }
+
+        #sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .footer-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .footer-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* --- Main Chat Area --- */
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-chat);
             position: relative;
             overflow: hidden;
         }
-        
-        .vu-level {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, var(--neon-green), var(--neon-purple));
-            height: 0%;
-            transition: height 0.05s;
+
+        #chat-header {
+            height: 60px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background-color: var(--bg-chat);
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
         }
 
-        .console-log {
-            font-family: 'Consolas', monospace;
-            font-size: 0.8rem;
-            background: #000;
-            color: #0f0;
-            padding: 15px;
-            height: 120px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        #mobile-menu-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .model-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .model-badge {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .icon-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        #chat-container {
+            flex: 1;
             overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            fill: var(--accent-color);
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            line-height: 1.5;
+        }
+
+        .suggested-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            max-width: 600px;
+        }
+
+        .suggested-prompt {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: var(--border-radius-lg);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggested-prompt:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* --- Messages --- */
+        .message-wrapper {
+            display: flex;
+            width: 100%;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .message-wrapper.user {
+            justify-content: flex-end;
+        }
+
+        .message-wrapper.bot {
+            justify-content: flex-start;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: var(--border-radius-lg);
+            position: relative;
+            line-height: 1.6;
+            font-size: 1rem;
+            word-wrap: break-word;
+        }
+
+        .message-wrapper.user .message {
+            background-color: var(--message-user-bg);
+            color: var(--message-user-text);
+            border-bottom-left-radius: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message-wrapper.bot .message {
+            background-color: var(--message-bot-bg);
+            color: var(--message-bot-text);
+            border-bottom-right-radius: 4px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .message-wrapper:hover .message-actions {
+            opacity: 1;
+        }
+
+        .msg-action-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(150, 150, 150, 0.1);
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .msg-action-btn:hover {
+            background-color: rgba(150, 150, 150, 0.3);
+            color: var(--text-primary);
+        }
+
+        .msg-action-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
         }
 
         /* Loading Animation */
-        .overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 999;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 10px 15px;
             align-items: center;
         }
-        .spinner {
-            width: 60px; height: 60px;
-            border: 4px solid #333;
-            border-top: 4px solid var(--neon-purple);
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-secondary);
             border-radius: 50%;
-            animation: spin 1s infinite linear;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Markdown Styles within Message */
+        .message h1, .message h2, .message h3 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .message p { margin-bottom: 10px; }
+        .message p:last-child { margin-bottom: 0; }
+        .message ul, .message ol {
+            margin-bottom: 10px;
+            padding-inline-start: 25px;
+        }
+        .message li { margin-bottom: 5px; }
+        .message strong { font-weight: 700; color: var(--accent-color); }
+        .message em { font-style: italic; }
+        
+        .message code:not(pre code) {
+            background-color: rgba(150, 150, 150, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .code-block-wrapper {
+            margin: 15px 0;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            background-color: var(--code-bg);
+            box-shadow: var(--shadow-sm);
+            direction: ltr;
+            text-align: left;
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background-color: var(--code-header);
+            color: #a0a0a0;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        .copy-code-btn {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-family);
+            transition: color 0.2s;
+        }
+
+        .copy-code-btn:hover {
+            color: #ffffff;
+        }
+
+        .copy-code-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .message pre {
+            margin: 0;
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        .message pre code {
+            color: var(--code-text);
+            font-family: monospace;
+            font-size: 0.9rem;
+            background: transparent;
+            padding: 0;
+        }
+
+        /* --- Input Area --- */
+        #input-container {
+            padding: 20px;
+            background-color: var(--bg-chat);
+            border-top: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        #input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: 10px 15px;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #input-wrapper:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.2);
+        }
+
+        #message-input {
+            flex: 1;
+            border: none;
+            background: none;
+            resize: none;
+            min-height: 24px;
+            max-height: 200px;
+            padding: 5px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        #message-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 2px;
+        }
+
+        .input-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            background: none;
+        }
+
+        .input-btn:hover {
+            background-color: rgba(150, 150, 150, 0.1);
+            color: var(--text-primary);
+        }
+
+        .input-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        #send-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        #send-btn:hover {
+            background-color: var(--accent-hover);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        #send-btn:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        /* ==========================================================================
+           4. Modals & Overlays
+           ========================================================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--modal-overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: var(--bg-sidebar);
+            border-radius: var(--border-radius-md);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-modal-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .close-modal-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .close-modal-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Form Controls */
+        .form-group {
             margin-bottom: 20px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Sliders */
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        input {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            width: 40px;
+            text-align: center;
+            font-weight: 600;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Selects */
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2365676b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: left 15px top 50%;
+            background-size: 12px auto;
+            padding-left: 30px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-danger {
+            background-color: var(--error-color);
+            color: white;
+            border: 1px solid var(--error-color);
+        }
+
+        /* Tabs inside settings */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Safety Settings Grid */
+        .safety-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .safety-item {
+            background-color: var(--bg-main);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .safety-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .safety-item-title {
+            font-weight: 600;
+        }
+
+        /* ==========================================================================
+           5. Toast Notifications
+           ========================================================================== */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* Right for LTR, Left for RTL */
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 250px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-sidebar);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-right: 4px solid var(--accent-color);
+            transform: translateX(-100%);
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+            font-weight: 500;
+        }
+
+        .toast.success { border-right-color: var(--success-color); }
+        .toast.error { border-right-color: var(--error-color); }
+        .toast.warning { border-right-color: var(--warning-color); }
+
+        .toast.hiding {
+            animation: slideOut 0.3s forwards;
+        }
+
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { fill: var(--success-color); }
+        .toast.error .toast-icon { fill: var(--error-color); }
+        .toast.warning .toast-icon { fill: var(--warning-color); }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            to { transform: translateX(-100%); opacity: 0; }
+        }
+
+        /* ==========================================================================
+           6. Responsive Design (Media Queries)
+           ========================================================================== */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(100%); /* Start hidden in RTL */
+                box-shadow: var(--shadow-lg);
+            }
+            
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            #mobile-menu-btn {
+                display: block;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+
+        /* Overlay for mobile sidebar */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-overlay);
+            z-index: 99;
+        }
+
+        #sidebar-overlay.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="loader">
-    <div class="spinner"></div>
-    <h2 id="loaderText">AI מנתח את הבקשה...</h2>
-    <p style="color: #888">יוצר עיבוד מוזיקלי מורכב (זה עשוי לקחת מספר שניות)</p>
-</div>
+    <!-- Main Container -->
+    <div id="app-container">
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebar-overlay"></div>
 
-<div class="studio-container">
-    <header>
-        <h1>AI Trance Engine <span style="font-size:1rem; vertical-align:middle; color:#666">v3.0 PRO</span></h1>
-        <p>מערכת הפקה אוטומטית מלאה עם אפקטים ומבנה שיר דינאמי</p>
-    </header>
-
-    <div class="controls-grid">
-        <div class="sidebar">
-            <h3 style="margin-top:0">הגדרות הפקה</h3>
-            
-            <label>API Key (Gemini):</label>
-            <input type="password" id="apiKey" placeholder="הדבק מפתח כאן...">
-            
-            <label>תיאור הקטע (Prompt):</label>
-            <textarea id="prompt" rows="4" placeholder="לדוגמה: Epic uplifting trance, 138 BPM, emotional breakdown, heavy acid bassline, ethereal pads."></textarea>
-            
-            <label>אורך ומבנה:</label>
-            <select id="durationMode">
-                <option value="short">קצר (דקה 1 - דמו)</option>
-                <option value="full">מלא (מבנה שיר מתפתח)</option>
-            </select>
-
-            <div class="btn-group" style="margin-top: 20px;">
-                <button class="btn-gen" onclick="generateTrack()">🚀 צור מוזיקה</button>
-                <button class="btn-stop" id="stopBtn" onclick="stopEngine()" disabled>⏹ עצור</button>
-                <button class="btn-gen" style="background:#00ff88" onclick="downloadWav()" id="dlBtn" disabled>⬇ הורד WAV</button>
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div id="sidebar-header">
+                <button id="new-chat-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    שיחה חדשה
+                </button>
             </div>
-        </div>
-
-        <div class="main-display">
-            <div class="visualizer-container">
-                <div class="track-status" id="statusDisplay">READY</div>
-                <canvas id="mainCanvas"></canvas>
+            <div id="chat-list">
+                <!-- Chat List Items will be injected here via JS -->
             </div>
+            <div id="sidebar-footer">
+                <button class="footer-btn" id="prompts-library-btn">
+                    <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM10 9h8v2h-8zm0 3h4v2h-4zm0-6h8v2h-8z"/></svg>
+                    ספריית פרומפטים
+                </button>
+                <button class="footer-btn" id="open-settings-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    הגדרות מתקדמות
+                </button>
+            </div>
+        </aside>
 
-            <div class="channels-rack" id="mixerRack">
+        <!-- Main Chat Area -->
+        <main id="main-content">
+            <header id="chat-header">
+                <div class="header-left">
+                    <button id="mobile-menu-btn">
+                        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                    </button>
+                    <div class="model-info">
+                        Gemini 3.1 Pro Preview
+                        <span class="model-badge">AI</span>
+                    </div>
                 </div>
+                <div class="header-right">
+                    <button class="icon-btn" id="theme-toggle-btn" title="החלף עיצוב">
+                        <!-- Moon / Sun icon injected via JS -->
+                        <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                    </button>
+                    <button class="icon-btn" id="clear-chat-btn" title="נקה שיחה נוכחית">
+                        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div id="chat-container">
+                <!-- Welcome Screen (Visible when chat is empty) -->
+                <div class="welcome-screen" id="welcome-screen">
+                    <svg class="welcome-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <h1 class="welcome-title">איך אפשר לעזור לך היום?</h1>
+                    <p class="welcome-subtitle">אני מודל Gemini 3.1 Pro Preview. נסה לבקש ממני לכתוב קוד, לנתח נתונים, או פשוט לנהל שיחה מעניינת.</p>
+                    <div class="suggested-prompts">
+                        <div class="suggested-prompt" data-prompt="כתוב לי קוד פייתון פשוט שיוצר שרת web בעזרת Flask.">קוד: שרת Flask בפייתון</div>
+                        <div class="suggested-prompt" data-prompt="הסבר לי מה זה מחשוב קוונטי בצורה פשוטה שילד בן 10 יבין.">הסבר: מחשוב קוונטי</div>
+                        <div class="suggested-prompt" data-prompt="תכתוב שיר קצר בחרוזים על בינה מלאכותית וקפה.">יצירתיות: שיר על AI</div>
+                    </div>
+                </div>
+                <!-- Messages will be injected here -->
+            </div>
+
+            <div id="input-container">
+                <div id="input-wrapper">
+                    <textarea id="message-input" placeholder="הקלד את ההודעה שלך כאן... (Shift + Enter לשורה חדשה)" rows="1" dir="auto"></textarea>
+                    <div class="input-actions">
+                        <button class="input-btn" id="voice-input-btn" title="הכתבה קולית">
+                            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                        </button>
+                        <button class="input-btn" id="send-btn" title="שלח הודעה">
+                            <svg viewBox="0 0 24 24" style="transform: scaleX(-1);"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-footer">
+                    המודל עשוי להציג מידע לא מדויק. מומלץ לוודא את העובדות. המערכת מבוססת על Gemini API.
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+         Modals
+         ========================================================================== -->
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">הגדרות מתקדמות</h2>
+                <button class="close-modal-btn" data-close="settings-modal">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
             
-            <div class="console-log" id="sysLog">
-                > System initialized.
-                > AudioEngine v3.0 loaded.
-                > Waiting for user input...
+            <div class="tabs">
+                <div class="tab active" data-tab="general">כללי & API</div>
+                <div class="tab" data-tab="params">פרמטרים של המודל</div>
+                <div class="tab" data-tab="safety">הגדרות בטיחות</div>
+                <div class="tab" data-tab="system">הוראות מערכת</div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tab: General -->
+                <div class="tab-content active" id="tab-general">
+                    <div class="form-group">
+                        <label for="api-key-input">Gemini API Key</label>
+                        <input type="password" id="api-key-input" class="form-control" placeholder="AIzaSy...">
+                        <span class="help-text">המפתח שלך נשמר מקומית בדפדפן בלבד (LocalStorage). <a href="https://aistudio.google.com/app/apikey" target="_blank">השג מפתח כאן</a>.</span>
+                    </div>
+                    <div class="form-group">
+                        <label>נתונים</label>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" id="export-data-btn">ייצוא נתונים (JSON)</button>
+                            <label class="btn btn-secondary" style="margin: 0; cursor: pointer;">
+                                ייבוא נתונים
+                                <input type="file" id="import-data-input" accept=".json" style="display: none;">
+                            </label>
+                            <button class="btn btn-danger" id="delete-all-btn">מחק הכל</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Model Parameters -->
+                <div class="tab-content" id="tab-params">
+                    <div class="form-group">
+                        <label for="temp-slider">Temperature (יצירתיות)</label>
+                        <div class="slider-group">
+                            <input type="range" id="temp-slider" min="0" max="2" step="0.1" value="0.7">
+                            <span class="slider-value" id="temp-value">0.7</span>
+                        </div>
+                        <span class="help-text">ערך גבוה יותר = פלט אקראי ויצירתי יותר (0.0 - 2.0).</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topk-slider">Top K</label>
+                        <div class="slider-group">
+                            <input type="range" id="topk-slider" min="1" max="100" step="1" value="40">
+                            <span class="slider-value" id="topk-value">40</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="topp-slider">Top P</label>
+                        <div class="slider-group">
+                            <input type="range" id="topp-slider" min="0" max="1" step="0.05" value="0.95">
+                            <span class="slider-value" id="topp-value">0.95</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="max-tokens-input">Max Output Tokens</label>
+                        <input type="number" id="max-tokens-input" class="form-control" value="8192" min="1" max="8192">
+                        <span class="help-text">אורך התשובה המקסימלי בטוקנים.</span>
+                    </div>
+                </div>
+
+                <!-- Tab: Safety Settings -->
+                <div class="tab-content" id="tab-safety">
+                    <span class="help-text" style="margin-bottom: 15px;">הגדר את סף הסינון לקטגוריות שונות. מומלץ להשאיר על ברירת המחדל (Block Some).</span>
+                    <div class="safety-grid">
+                        <div class="safety-item">
+                            <div class="safety-item-header">
+                                <span class="safety-item-title">הטרדה (Harassment)</span>
+                            </div>
+                            <select class="form-control" id="safety-harassment">
+                                <option value="BLOCK_NONE">אל תחסום כלום (Block None)</option>
+                                <option value="BLOCK_ONLY_HIGH">חסום גבוה בלבד (Block High)</option>
+                                <option value="BLOCK_MEDIUM_AND_ABOVE" selected>חסום בינוני ומעלה (Block Medium)</option>
+                                <option value="BLOCK_LOW_AND_ABOVE">חסום הכל (Block Low)</option>
+                            </select>
+                        </div>
+                        <div class="safety-item">
+                            <div class="safety-item-header">
+                                <span class="safety-item-title">דברי שנאה (Hate Speech)</span>
+                            </div>
+                            <select class="form-control" id="safety-hate">
+                                <option value="BLOCK_NONE">אל תחסום כלום</option>
+                                <option value="BLOCK_ONLY_HIGH">חסום גבוה בלבד</option>
+                                <option value="BLOCK_MEDIUM_AND_ABOVE" selected>חסום בינוני ומעלה</option>
+                                <option value="BLOCK_LOW_AND_ABOVE">חסום הכל</option>
+                            </select>
+                        </div>
+                        <div class="safety-item">
+                            <div class="safety-item-header">
+                                <span class="safety-item-title">תוכן מיני (xxxxxxxx xxxxxxxx)</span>
+                            </div>
+                            <select class="form-control" id="safety-xxx">
+                                <option value="BLOCK_NONE">אל תחסום כלום</option>
+                                <option value="BLOCK_ONLY_HIGH">חסום גבוה בלבד</option>
+                                <option value="BLOCK_MEDIUM_AND_ABOVE" selected>חסום בינוני ומעלה</option>
+                                <option value="BLOCK_LOW_AND_ABOVE">חסום הכל</option>
+                            </select>
+                        </div>
+                        <div class="safety-item">
+                            <div class="safety-item-header">
+                                <span class="safety-item-title">תוכן מסוכן (Dangerous Content)</span>
+                            </div>
+                            <select class="form-control" id="safety-danger">
+                                <option value="BLOCK_NONE">אל תחסום כלום</option>
+                                <option value="BLOCK_ONLY_HIGH">חסום גבוה בלבד</option>
+                                <option value="BLOCK_MEDIUM_AND_ABOVE" selected>חסום בינוני ומעלה</option>
+                                <option value="BLOCK_LOW_AND_ABOVE">חסום הכל</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: System Prompt -->
+                <div class="tab-content" id="tab-system">
+                    <div class="form-group">
+                        <label for="system-instruction-input">הוראות מערכת (System Instructions)</label>
+                        <textarea id="system-instruction-input" class="form-control" placeholder="לדוגמה: אתה מתכנת בכיר ב-Python. תמיד תענה בקצרה ותספק קוד יעיל ומעיר."></textarea>
+                        <span class="help-text">הגדר למודל את האישיות שלו, חוקים מיוחדים, או אופן תגובה ספציפי. (חל על כל השיחות החדשות)</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="settings-modal">ביטול</button>
+                <button class="btn btn-primary" id="save-settings-btn">שמור הגדרות</button>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-/**
- * AI TRANCE ENGINE v3.0 - ADVANCED CORE
- * תכונות: מבנה שיר, סינתזה מורכבת (FM/Subtractive), שרשרת אפקטים.
- */
+    <!-- Prompts Library Modal -->
+    <div class="modal-overlay" id="prompts-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">ספריית פרומפטים מתקדמים</h2>
+                <button class="close-modal-btn" data-close="prompts-modal">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="safety-grid" id="prompts-grid">
+                    <!-- Prompts injected via JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="prompts-modal">סגור</button>
+            </div>
+        </div>
+    </div>
 
-// --- GLOBAL STATE ---
-const CONFIG = {
-    audioCtx: null,
-    masterGain: null,
-    compressor: null,
-    reverb: null,
-    analyser: null,
-    isPlaying: false,
-    bpm: 140,
-    nextNoteTime: 0,
-    currentTick: 0, // 16th notes
-    songStructure: [], // Array of patterns
-    currentSectionIndex: 0,
-    patternCursor: 0,
-    recorder: null,
-    chunks: [],
-    instruments: {}
-};
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
 
-const LOG_EL = document.getElementById('sysLog');
+    <!-- ==========================================================================
+         JavaScript Application Logic
+         ========================================================================== -->
+    <script>
+        /**
+         * System Configuration and Constants
+         */
+        const CONFIG = {
+            API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:streamGenerateContent',
+            MODEL_NAME: 'gemini-3.1-pro-preview',
+            STORAGE_KEY_CHATS: 'gemini_chats',
+            STORAGE_KEY_SETTINGS: 'gemini_settings',
+            STORAGE_KEY_THEME: 'gemini_theme',
+            DEFAULT_SETTINGS: {
+                apiKey: '',
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 8192,
+                systemInstruction: '',
+                safetySettings: {
+                    harassment: 'BLOCK_MEDIUM_AND_ABOVE',
+                    hate: 'BLOCK_MEDIUM_AND_ABOVE',
+                    xxx: 'BLOCK_MEDIUM_AND_ABOVE',
+                    danger: 'BLOCK_MEDIUM_AND_ABOVE'
+                }
+            }
+        };
 
-// --- UTILS ---
-function log(msg) {
-    const time = new Date().toLocaleTimeString();
-    LOG_EL.innerHTML += `<div><span style="opacity:0.5">[${time}]</span> ${msg}</div>`;
-    LOG_EL.scrollTop = LOG_EL.scrollHeight;
-}
+        const PROMPT_LIBRARY =
 
-function updateStatus(text) {
-    document.getElementById('statusDisplay').innerText = text;
-}
+        /**
+         * SVG Icons Dictionary
+         */
+        const ICONS = {
+            bot: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            user: '<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+            copy: '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>',
+            check: '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
+            play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+            trash: '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>',
+            success: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="#fff"/></svg>',
+            error: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15.3 8.7a1 1 0 00-1.4 0L12 10.6 10.1 8.7a1 1 0 00-1.4 1.4l1.9 1.9-1.9 1.9a1 1 0 001.4 1.4l1.9-1.9 1.9 1.9a1 1 0 001.4-1.4l-1.9-1.9 1.9-1.9a1 1 0 000-1.4z" fill="#fff"/></svg>',
+            warning: '<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>'
+        };
 
-// --- AUDIO EFFECTS ENGINE ---
+        /**
+         * Utilities
+         */
+        const Utils = {
+            generateId: () => '_' + Math.random().toString(36).substr(2, 9),
+            escapeHTML: (str) => {
+                return str.replace(//g, 
+                    tag => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        "'": '&#39;',
+                        '"': '&quot;'
+                    } || tag)
+                );
+            },
+            debounce: (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        };
 
-class Reverb {
-    constructor(ctx) {
-        this.ctx = ctx;
-        this.input = ctx.createGain();
-        this.output = ctx.createGain();
-        this.convolver = ctx.createConvolver();
-        
-        // יצירת אימפולס ריברב מלאכותי
-        const duration = 2.5;
-        const decay = 2.0;
-        const rate = ctx.sampleRate;
-        const length = rate * duration;
-        const impulse = ctx.createBuffer(2, length, rate);
-        const left = impulse.getChannelData(0);
-        const right = impulse.getChannelData(1);
+        /**
+         * Custom Markdown Parser
+         * Parses Text to HTML without external libraries.
+         */
+        class MarkdownParser {
+            static parse(text) {
+                if (!text) return '';
+                let html = Utils.escapeHTML(text);
 
-        for (let i = 0; i < length; i++) {
-            const n = i / length;
-            left[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
-            right[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
-        }
-        
-        this.convolver.buffer = impulse;
-        this.input.connect(this.convolver);
-        this.convolver.connect(this.output);
-        this.output.gain.value = 0.3; // Dry/Wet
-    }
-}
+                // 1. Code Blocks (```lang code ```)
+                let codeBlockCount = 0;
+                const codeBlocks =[];
+                html = html.replace(/```(\w*)\n(*?)```/g, (match, lang, code) => {
+                    const id = `code-block-${codeBlockCount++}`;
+                    codeBlocks.push({ id, code, lang: lang || 'text' });
+                    return `___CODE_BLOCK_${id}___`; // Placeholder
+                });
 
-class Delay {
-    constructor(ctx, time = 0.375, feedback = 0.4) {
-        this.ctx = ctx;
-        this.input = ctx.createGain();
-        this.output = ctx.createGain();
-        this.delay = ctx.createDelay(5.0);
-        this.feedback = ctx.createGain();
-        this.filter = ctx.createBiquadFilter();
+                // 2. Inline Code (`code`)
+                html = html.replace(/`(+)`/g, '<code>$1</code>');
 
-        this.delay.delayTime.value = time;
-        this.feedback.gain.value = feedback;
-        this.filter.type = 'lowpass';
-        this.filter.frequency.value = 2000;
+                // 3. Bold (**text**)
+                html = html.replace(/\*\*(+)\*\*/g, '<strong>$1</strong>');
 
-        this.input.connect(this.delay);
-        this.delay.connect(this.filter);
-        this.filter.connect(this.feedback);
-        this.feedback.connect(this.delay);
-        this.filter.connect(this.output);
-        
-        this.output.gain.value = 0.4;
-    }
-}
+                // 4. Italic (*text*)
+                html = html.replace(/\*(+)\*/g, '<em>$1</em>');
 
-// --- SYNTHESIS INSTRUMENTS ---
+                // 5. Headers (# Header)
+                html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+                html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+                html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
-class KickSynth {
-    constructor(ctx, dest) {
-        this.ctx = ctx;
-        this.dest = dest;
-    }
-    trigger(time, vel = 1) {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        osc.frequency.setValueAtTime(150, time);
-        osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
-        
-        gain.gain.setValueAtTime(vel, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
+                // 6. Unordered Lists (- item)
+                html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+                // Wrap lists
+                html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+                // Fix multiple uls if any (simple fix)
+                html = html.replace(/<\/ul>\n<ul>/g, '\n');
 
-        osc.connect(gain);
-        gain.connect(this.dest);
-        
-        osc.start(time);
-        osc.stop(time + 0.4);
-        animateChannel('kick');
-    }
-}
+                // 7. Line Breaks
+                html = html.replace(/\n/g, '<br>');
 
-class SnareSynth {
-    constructor(ctx, dest) {
-        this.ctx = ctx;
-        this.dest = dest;
-    }
-    trigger(time, vel = 1) {
-        // Tone
-        const osc = this.ctx.createOscillator();
-        const oscGain = this.ctx.createGain();
-        osc.frequency.setValueAtTime(250, time);
-        osc.frequency.linearRampToValueAtTime(150, time + 0.1);
-        oscGain.gain.setValueAtTime(0.5 * vel, time);
-        oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
-        osc.connect(oscGain);
-        oscGain.connect(this.dest);
-        osc.start(time); osc.stop(time+0.2);
+                // 8. Restore Code Blocks with custom UI
+                codeBlocks.forEach(block => {
+                    const blockHtml = `
+                        <div class="code-block-wrapper">
+                            <div class="code-block-header">
+                                <span>${block.lang}</span>
+                                <button class="copy-code-btn" onclick="app.copyCode('${Utils.escapeHTML(block.code).replace(/'/g, "\\'")}')">
+                                    ${ICONS.copy} העתק קוד
+                                </button>
+                            </div>
+                            <pre><code class="language-${block.lang}">${block.code}</code></pre>
+                        </div>
+                    `;
+                    html = html.replace(`___CODE_BLOCK_${block.id}___`, blockHtml);
+                });
 
-        // Noise
-        const noiseBufferSize = this.ctx.sampleRate * 0.2;
-        const buffer = this.ctx.createBuffer(1, noiseBufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for(let i=0; i<noiseBufferSize; i++) data[i] = Math.random()*2-1;
-        
-        const noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
-        const noiseFilter = this.ctx.createBiquadFilter();
-        noiseFilter.type = 'highpass';
-        noiseFilter.frequency.value = 1000;
-        const noiseGain = this.ctx.createGain();
-        noiseGain.gain.setValueAtTime(0.8 * vel, time);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
-        
-        noise.connect(noiseFilter).connect(noiseGain).connect(this.dest);
-        noise.start(time);
-        animateChannel('snare');
-    }
-}
-
-class HiHatSynth {
-    constructor(ctx, dest, type='closed') {
-        this.ctx = ctx;
-        this.dest = dest;
-        this.type = type;
-    }
-    trigger(time, vel = 1) {
-        // Metallic noise spectrum
-        const fund = 40;
-        const oscs = [2, 3, 4.16, 5.43, 6.79, 8.21];
-        const gain = this.ctx.createGain();
-        const filter = this.ctx.createBiquadFilter();
-        
-        filter.type = 'highpass';
-        filter.frequency.value = 8000;
-        
-        const decay = this.type === 'open' ? 0.4 : 0.05;
-        gain.gain.setValueAtTime(0.3 * vel, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + decay);
-
-        oscs.forEach(ratio => {
-            const osc = this.ctx.createOscillator();
-            osc.type = 'square';
-            osc.frequency.value = fund * ratio;
-            osc.connect(filter);
-            osc.start(time);
-            osc.stop(time + decay);
-        });
-
-        filter.connect(gain);
-        gain.connect(this.dest);
-        animateChannel('hats');
-    }
-}
-
-class SuperSawSynth { // For Leads and Pads
-    constructor(ctx, dest, isPad = false) {
-        this.ctx = ctx;
-        this.dest = dest;
-        this.isPad = isPad;
-    }
-    trigger(freq, time, duration, vel=1) {
-        if(freq <= 0) return;
-        const voices = 3; // 3 osc per note for thickness
-        const detuneAmount = 10;
-        const mainGain = this.ctx.createGain();
-        
-        // Envelope
-        const attack = this.isPad ? 0.5 : 0.01;
-        const release = this.isPad ? 0.8 : 0.2;
-        
-        mainGain.gain.setValueAtTime(0, time);
-        mainGain.gain.linearRampToValueAtTime(0.15 * vel, time + attack);
-        mainGain.gain.setValueAtTime(0.15 * vel, time + duration - release);
-        mainGain.gain.linearRampToValueAtTime(0.001, time + duration);
-
-        // Lowpass Filter
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(this.isPad ? 800 : 2000, time);
-        if(!this.isPad) {
-            filter.frequency.linearRampToValueAtTime(4000, time + attack);
-            filter.frequency.exponentialRampToValueAtTime(1000, time + duration);
+                // Wrap stray text in paragraphs (simplified)
+                return html;
+            }
         }
 
-        for(let i=0; i<voices; i++) {
-            const osc = this.ctx.createOscillator();
-            osc.type = 'sawtooth';
-            const detune = (i - (voices-1)/2) * detuneAmount;
-            osc.frequency.value = freq;
-            osc.detune.value = detune;
-            osc.connect(filter);
-            osc.start(time);
-            osc.stop(time + duration);
+        /**
+         * Storage Manager
+         * Handles LocalStorage operations.
+         */
+        class StorageManager {
+            static getSettings() {
+                const stored = localStorage.getItem(CONFIG.STORAGE_KEY_SETTINGS);
+                if (stored) {
+                    try {
+                        return { ...CONFIG.DEFAULT_SETTINGS, ...JSON.parse(stored) };
+                    } catch(e) { console.error("Error parsing settings", e); }
+                }
+                return CONFIG.DEFAULT_SETTINGS;
+            }
+
+            static saveSettings(settings) {
+                localStorage.setItem(CONFIG.STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+            }
+
+            static getChats() {
+                const stored = localStorage.getItem(CONFIG.STORAGE_KEY_CHATS);
+                if (stored) {
+                    try {
+                        return JSON.parse(stored);
+                    } catch(e) { console.error("Error parsing chats", e); }
+                }
+                return[];
+            }
+
+            static saveChats(chats) {
+                localStorage.setItem(CONFIG.STORAGE_KEY_CHATS, JSON.stringify(chats));
+            }
+
+            static getTheme() {
+                return localStorage.getItem(CONFIG.STORAGE_KEY_THEME) || 'light';
+            }
+
+            static saveTheme(theme) {
+                localStorage.setItem(CONFIG.STORAGE_KEY_THEME, theme);
+            }
         }
 
-        filter.connect(mainGain);
-        mainGain.connect(this.dest);
-        animateChannel(this.isPad ? 'pad' : 'lead');
-    }
-}
+        /**
+         * Main Application Controller
+         */
+        class ChatApp {
+            constructor() {
+                this.settings = StorageManager.getSettings();
+                this.chats = StorageManager.getChats();
+                this.currentChatId = null;
+                this.isGenerating = false;
+                this.abortController = null;
+                
+                // Speech Recognition Setup
+                this.recognition = null;
+                this.isRecording = false;
 
-class AcidBassSynth {
-    constructor(ctx, dest) {
-        this.ctx = ctx;
-        this.dest = dest;
-    }
-    trigger(freq, time, duration, vel=1, slide=false) {
-        if(freq <= 0) return;
-        const osc = this.ctx.createOscillator();
-        const filter = this.ctx.createBiquadFilter();
-        const gain = this.ctx.createGain();
+                this.initDOM();
+                this.bindEvents();
+                this.applyTheme(StorageManager.getTheme());
+                this.renderChatList();
+                this.loadSettingsUI();
+                this.createNewChatIfEmpty();
+                this.setupSpeechRecognition();
+            }
 
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(freq, time);
-        if(slide) {
-             osc.frequency.exponentialRampToValueAtTime(freq * 0.5, time + duration);
-        }
+            // --- Initialization ---
 
-        filter.type = 'lowpass';
-        filter.Q.value = 15;
-        filter.frequency.setValueAtTime(400, time);
-        filter.frequency.exponentialRampToValueAtTime(2500, time + (duration*0.6));
-        filter.frequency.exponentialRampToValueAtTime(400, time + duration);
+            initDOM() {
+                // Main UI
+                this.els = {
+                    chatList: document.getElementById('chat-list'),
+                    chatContainer: document.getElementById('chat-container'),
+                    messageInput: document.getElementById('message-input'),
+                    sendBtn: document.getElementById('send-btn'),
+                    newChatBtn: document.getElementById('new-chat-btn'),
+                    themeToggleBtn: document.getElementById('theme-toggle-btn'),
+                    clearChatBtn: document.getElementById('clear-chat-btn'),
+                    welcomeScreen: document.getElementById('welcome-screen'),
+                    voiceInputBtn: document.getElementById('voice-input-btn'),
+                    
+                    // Mobile
+                    sidebar: document.getElementById('sidebar'),
+                    mobileMenuBtn: document.getElementById('mobile-menu-btn'),
+                    sidebarOverlay: document.getElementById('sidebar-overlay'),
 
-        gain.gain.setValueAtTime(0.4 * vel, time);
-        gain.gain.linearRampToValueAtTime(0.001, time + duration);
+                    // Modals
+                    settingsModal: document.getElementById('settings-modal'),
+                    promptsModal: document.getElementById('prompts-modal'),
+                    promptsGrid: document.getElementById('prompts-grid'),
+                    
+                    // Settings Inputs
+                    apiKeyInput: document.getElementById('api-key-input'),
+                    tempSlider: document.getElementById('temp-slider'),
+                    tempValue: document.getElementById('temp-value'),
+                    topKSlider: document.getElementById('topk-slider'),
+                    topKValue: document.getElementById('topk-value'),
+                    topPSlider: document.getElementById('topp-slider'),
+                    topPValue: document.getElementById('topp-value'),
+                    maxTokensInput: document.getElementById('max-tokens-input'),
+                    systemInstructionInput: document.getElementById('system-instruction-input'),
+                    
+                    // Safety Inputs
+                    safetyHarassment: document.getElementById('safety-harassment'),
+                    safetyHate: document.getElementById('safety-hate'),
+                    safetySex: document.getElementById('xxxxxx-xxx'),
+                    safetyDanger: document.getElementById('safety-danger')
+                };
+            }
 
-        osc.connect(filter).connect(gain).connect(this.dest);
-        osc.start(time);
-        osc.stop(time + duration);
-        animateChannel('bass');
-    }
-}
+            bindEvents() {
+                // Input handling
+                this.els.messageInput.addEventListener('input', () => {
+                    this.autoResizeTextarea();
+                    this.toggleSendButton();
+                });
 
-// --- CORE LOGIC ---
+                this.els.messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleSend();
+                    }
+                });
 
-function initAudio() {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    CONFIG.audioCtx = new AudioContext();
-    const ctx = CONFIG.audioCtx;
+                this.els.sendBtn.addEventListener('click', () => this.handleSend());
+                this.els.newChatBtn.addEventListener('click', () => this.createNewChat());
+                this.els.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+                this.els.clearChatBtn.addEventListener('click', () => this.clearCurrentChat());
+                this.els.voiceInputBtn.addEventListener('click', () => this.toggleVoiceRecording());
 
-    // Master Chain
-    CONFIG.masterGain = ctx.createGain();
-    CONFIG.masterGain.gain.value = 0.8;
-    
-    CONFIG.compressor = ctx.createDynamicsCompressor();
-    CONFIG.compressor.threshold.value = -15;
-    CONFIG.compressor.ratio.value = 12;
-    
-    CONFIG.analyser = ctx.createAnalyser();
-    CONFIG.analyser.fftSize = 2048;
+                // Mobile Menu
+                this.els.mobileMenuBtn.addEventListener('click', () => this.toggleMobileSidebar(true));
+                this.els.sidebarOverlay.addEventListener('click', () => this.toggleMobileSidebar(false));
 
-    // FX Buses
-    CONFIG.reverb = new Reverb(ctx);
-    CONFIG.delay = new Delay(ctx, 60/CONFIG.bpm * 0.75); // Dotted 8th delay
+                // Settings Modal
+                document.getElementById('open-settings-btn').addEventListener('click', () => this.openModal('settings-modal'));
+                document.getElementById('save-settings-btn').addEventListener('click', () => this.saveSettings());
+                
+                // Prompts Library
+                document.getElementById('prompts-library-btn').addEventListener('click', () => this.openPromptsLibrary());
+                
+                // Modal Close Buttons
+                document.querySelectorAll('').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.closeModal(e.currentTarget.dataset.close));
+                });
 
-    // Routing: Master -> Compressor -> Analyser -> Dest
-    CONFIG.masterGain.connect(CONFIG.compressor);
-    CONFIG.compressor.connect(CONFIG.analyser);
-    CONFIG.analyser.connect(ctx.destination);
+                // Settings Tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => this.switchTab(e.currentTarget));
+                });
 
-    // Recording Stream
-    const dest = ctx.createMediaStreamDestination();
-    CONFIG.compressor.connect(dest);
-    CONFIG.recorder = new MediaRecorder(dest.stream);
-    CONFIG.recorder.ondataavailable = e => CONFIG.chunks.push(e.data);
+                // Sliders sync
+                const syncSlider = (sliderId, valueId) => {
+                    const slider = document.getElementById(sliderId);
+                    const val = document.getElementById(valueId);
+                    slider.addEventListener('input', () => { val.textContent = slider.value; });
+                };
+                syncSlider('temp-slider', 'temp-value');
+                syncSlider('topk-slider', 'topk-value');
+                syncSlider('topp-slider', 'topp-value');
 
-    // Instantiate Instruments
-    CONFIG.instruments = {
-        kick: new KickSynth(ctx, CONFIG.masterGain),
-        snare: new SnareSynth(ctx, CONFIG.reverb.input), // Snare to reverb
-        hatOpen: new HiHatSynth(ctx, CONFIG.masterGain, 'open'),
-        hatClosed: new HiHatSynth(ctx, CONFIG.masterGain, 'closed'),
-        bass: new AcidBassSynth(ctx, CONFIG.masterGain),
-        lead: new SuperSawSynth(ctx, CONFIG.delay.input), // Lead to delay
-        pad: new SuperSawSynth(ctx, CONFIG.reverb.input, true)
-    };
-    
-    // Connect FX returns
-    CONFIG.reverb.output.connect(CONFIG.masterGain);
-    CONFIG.delay.output.connect(CONFIG.masterGain);
-    
-    // UI Setup
-    setupMixerUI();
-    drawVisualizer();
-}
+                // Export / Import / Delete All
+                document.getElementById('export-data-btn').addEventListener('click', () => this.exportData());
+                document.getElementById('import-data-input').addEventListener('change', (e) => this.importData(e));
+                document.getElementById('delete-all-btn').addEventListener('click', () => {
+                    if(confirm('האם אתה בטוח שברצונך למחוק את כל השיחות וההגדרות?')) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                });
 
-function scheduler() {
-    const lookahead = 0.1;
-    const scheduleInterval = 25;
-    
-    function nextTick() {
-        const secondsPerBeat = 60.0 / CONFIG.bpm;
-        const secondsPerTick = secondsPerBeat / 4; // 16th notes
-        CONFIG.nextNoteTime += secondsPerTick;
-        CONFIG.currentTick++;
-        
-        if (CONFIG.currentTick >= 16) {
-            CONFIG.currentTick = 0;
-            CONFIG.patternCursor++;
-            
-            // בדיקה אם צריך לעבור לחלק הבא בשיר
-            const currentSection = CONFIG.songStructure[CONFIG.currentSectionIndex];
-            if(currentSection && CONFIG.patternCursor >= currentSection.bars) {
-                CONFIG.patternCursor = 0;
-                CONFIG.currentSectionIndex++;
-                if(CONFIG.currentSectionIndex >= CONFIG.songStructure.length) {
-                    stopEngine(); // סוף השיר
+                // Suggested Prompts (Delegation)
+                this.els.welcomeScreen.addEventListener('click', (e) => {
+                    const promptEl = e.target.closest('.suggested-prompt');
+                    if (promptEl) {
+                        this.els.messageInput.value = promptEl.dataset.prompt;
+                        this.autoResizeTextarea();
+                        this.handleSend();
+                    }
+                });
+            }
+
+            setupSpeechRecognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.lang = 'he-IL';
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = false;
+
+                    this.recognition.onstart = () => {
+                        this.isRecording = true;
+                        this.els.voiceInputBtn.style.color = 'var(--error-color)';
+                        this.showToast('מקשיב...', 'success');
+                    };
+
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results.transcript;
+                        this.els.messageInput.value += transcript + ' ';
+                        this.autoResizeTextarea();
+                        this.toggleSendButton();
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        console.error('Speech recognition error', event.error);
+                        this.showToast('שגיאה בזיהוי קול.', 'error');
+                        this.stopRecording();
+                    };
+
+                    this.recognition.onend = () => {
+                        this.stopRecording();
+                    };
+                } else {
+                    this.els.voiceInputBtn.style.display = 'none'; // Hide if not supported
+                }
+            }
+
+            toggleVoiceRecording() {
+                if (!this.recognition) return;
+                
+                if (this.isRecording) {
+                    this.recognition.stop();
+                } else {
+                    try {
+                        this.recognition.start();
+                    } catch(e) {
+                        console.error(e);
+                    }
+                }
+            }
+
+            stopRecording() {
+                this.isRecording = false;
+                this.els.voiceInputBtn.style.color = 'var(--text-secondary)';
+            }
+
+            // --- UI Management ---
+
+            toggleMobileSidebar(show) {
+                if (show) {
+                    this.els.sidebar.classList.add('open');
+                    this.els.sidebarOverlay.classList.add('active');
+                } else {
+                    this.els.sidebar.classList.remove('open');
+                    this.els.sidebarOverlay.classList.remove('active');
+                }
+            }
+
+            applyTheme(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    // Change icon to Sun
+                    this.els.themeToggleBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg>';
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    // Change icon to Moon
+                    this.els.themeToggleBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>';
+                }
+                StorageManager.saveTheme(theme);
+            }
+
+            toggleTheme() {
+                const current = StorageManager.getTheme();
+                this.applyTheme(current === 'light' ? 'dark' : 'light');
+            }
+
+            autoResizeTextarea() {
+                const ta = this.els.messageInput;
+                ta.style.height = 'auto';
+                ta.style.height = (ta.scrollHeight) + 'px';
+            }
+
+            toggleSendButton() {
+                const text = this.els.messageInput.value.trim();
+                this.els.sendBtn.disabled = text.length === 0 || this.isGenerating;
+            }
+
+            showToast(message, type = 'success') {
+                const toastContainer = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const icon = ICONS || ICONS.success;
+                toast.innerHTML = `<div class="toast-icon">${icon}</div> <div>${message}</div>`;
+                
+                toastContainer.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('hiding');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // --- Modals & Tabs ---
+
+            openModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+            }
+
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+
+            switchTab(tabElement) {
+                const targetId = `tab-${tabElement.dataset.tab}`;
+                
+                // Remove active from all tabs in parent
+                const tabsContainer = tabElement.parentElement;
+                tabsContainer.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                
+                // Hide all contents
+                const modal = tabsContainer.closest('.modal-content');
+                modal.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Activate selected
+                tabElement.classList.add('active');
+                document.getElementById(targetId).classList.add('active');
+            }
+
+            openPromptsLibrary() {
+                this.els.promptsGrid.innerHTML = '';
+                PROMPT_LIBRARY.forEach(prompt => {
+                    const el = document.createElement('div');
+                    el.className = 'safety-item';
+                    el.style.cursor = 'pointer';
+                    el.innerHTML = `
+                        <div class="safety-item-title" style="margin-bottom: 5px; color: var(--accent-color);">${prompt.title}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${prompt.text}</div>
+                    `;
+                    el.addEventListener('click', () => {
+                        this.els.messageInput.value = prompt.text;
+                        this.autoResizeTextarea();
+                        this.toggleSendButton();
+                        this.closeModal('prompts-modal');
+                    });
+                    this.els.promptsGrid.appendChild(el);
+                });
+                this.openModal('prompts-modal');
+            }
+
+            // --- Settings Management ---
+
+            loadSettingsUI() {
+                this.els.apiKeyInput.value = this.settings.apiKey || '';
+                this.els.tempSlider.value = this.settings.temperature;
+                this.els.tempValue.textContent = this.settings.temperature;
+                this.els.topKSlider.value = this.settings.topK;
+                this.els.topKValue.textContent = this.settings.topK;
+                this.els.topPSlider.value = this.settings.topP;
+                this.els.topPValue.textContent = this.settings.topP;
+                this.els.maxTokensInput.value = this.settings.maxOutputTokens;
+                this.els.systemInstructionInput.value = this.settings.systemInstruction || '';
+                
+                this.els.safetyHarassment.value = this.settings.safetySettings.harassment;
+                this.els.safetyHate.value = this.settings.safetySettings.hate;
+                this.els.safetySex.value = this.settings.xxxxxxxxxxxxxx.xxx;
+                this.els.safetyDanger.value = this.settings.safetySettings.danger;
+            }
+
+            saveSettings() {
+                this.settings = {
+                    ...this.settings,
+                    apiKey: this.els.apiKeyInput.value.trim(),
+                    temperature: parseFloat(this.els.tempSlider.value),
+                    topK: parseInt(this.els.topKSlider.value),
+                    topP: parseFloat(this.els.topPSlider.value),
+                    maxOutputTokens: parseInt(this.els.maxTokensInput.value),
+                    systemInstruction: this.els.systemInstructionInput.value.trim(),
+                    safetySettings: {
+                        harassment: this.els.safetyHarassment.value,
+                        hate: this.els.safetyHate.value,
+                        xxx: this.els.safetySex.value,
+                        danger: this.els.safetyDanger.value
+                    }
+                };
+                StorageManager.saveSettings(this.settings);
+                this.closeModal('settings-modal');
+                this.showToast('ההגדרות נשמרו בהצלחה.');
+            }
+
+            // --- Chat Management ---
+
+            createNewChatIfEmpty() {
+                if (this.chats.length === 0) {
+                    this.createNewChat();
+                } else {
+                    this.selectChat(this.chats.id);
+                }
+            }
+
+            createNewChat() {
+                const newChat = {
+                    id: Utils.generateId(),
+                    title: 'שיחה חדשה',
+                    messages:[],
+                    updatedAt: Date.now()
+                };
+                this.chats.unshift(newChat);
+                this.saveChats();
+                this.renderChatList();
+                this.selectChat(newChat.id);
+                
+                if(window.innerWidth <= 768) this.toggleMobileSidebar(false);
+            }
+
+            clearCurrentChat() {
+                if(!this.currentChatId) return;
+                if(confirm('לנקות את כל ההודעות בשיחה זו?')) {
+                    const chat = this.chats.find(c => c.id === this.currentChatId);
+                    if(chat) {
+                        chat.messages =[];
+                        chat.title = 'שיחה חדשה';
+                        this.saveChats();
+                        this.renderMessages();
+                        this.renderChatList();
+                    }
+                }
+            }
+
+            deleteChat(id, event) {
+                event.stopPropagation();
+                if(confirm('האם למחוק שיחה זו?')) {
+                    this.chats = this.chats.filter(c => c.id !== id);
+                    this.saveChats();
+                    this.renderChatList();
+                    if(this.currentChatId === id) {
+                        this.currentChatId = null;
+                        this.createNewChatIfEmpty();
+                    }
+                }
+            }
+
+            selectChat(id) {
+                this.currentChatId = id;
+                this.renderChatList();
+                this.renderMessages();
+                if(window.innerWidth <= 768) this.toggleMobileSidebar(false);
+            }
+
+            saveChats() {
+                StorageManager.saveChats(this.chats);
+            }
+
+            // --- Data Export/Import ---
+            exportData() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.chats));
+                const dlAnchorElem = document.createElement('a');
+                dlAnchorElem.setAttribute("href",     dataStr     );
+                dlAnchorElem.setAttribute("download", "gemini_chats_backup.json");
+                dlAnchorElem.click();
+            }
+
+            importData(event) {
+                const file = event.target.files;
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            this.chats = imported;
+                            this.saveChats();
+                            this.renderChatList();
+                            this.createNewChatIfEmpty();
+                            this.showToast('נתונים יובאו בהצלחה.');
+                        } else {
+                            throw new Error("Invalid format");
+                        }
+                    } catch(err) {
+                        this.showToast('שגיאה בייבוא נתונים.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = ''; // reset
+            }
+
+            // --- Rendering ---
+
+            renderChatList() {
+                this.els.chatList.innerHTML = '';
+                this.chats.forEach(chat => {
+                    const el = document.createElement('div');
+                    el.className = `chat-list-item ${chat.id === this.currentChatId ? 'active' : ''}`;
+                    el.innerHTML = `
+                        <div class="chat-title" title="${Utils.escapeHTML(chat.title)}">
+                            ${Utils.escapeHTML(chat.title)}
+                        </div>
+                        <div class="chat-actions">
+                            <svg class="action-icon delete" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        </div>
+                    `;
+                    
+                    el.addEventListener('click', () => this.selectChat(chat.id));
+                    el.querySelector('.delete').addEventListener('click', (e) => this.deleteChat(chat.id, e));
+                    
+                    this.els.chatList.appendChild(el);
+                });
+            }
+
+            renderMessages() {
+                this.els.chatContainer.innerHTML = '';
+                const chat = this.chats.find(c => c.id === this.currentChatId);
+                
+                if (!chat || chat.messages.length === 0) {
+                    this.els.welcomeScreen.style.display = 'flex';
                     return;
                 }
-                const newSection = CONFIG.songStructure[CONFIG.currentSectionIndex];
-                updateStatus(`${newSection.name} (${CONFIG.currentSectionIndex + 1}/${CONFIG.songStructure.length})`);
-                log(`Now playing: ${newSection.name}`);
+                
+                this.els.welcomeScreen.style.display = 'none';
+
+                chat.messages.forEach(msg => {
+                    this.appendMessageToUI(msg.role, msg.content, false);
+                });
+                
+                this.scrollToBottom();
+            }
+
+            appendMessageToUI(role, text, isStreaming = false) {
+                const wrapper = document.createElement('div');
+                wrapper.className = `message-wrapper ${role}`;
+                
+                let htmlContent = role === 'bot' ? MarkdownParser.parse(text) : Utils.escapeHTML(text).replace(/\n/g, '<br>');
+                
+                let actionsHtml = '';
+                if (role === 'bot') {
+                    // Unique ID to store raw text for TTS
+                    const textDataId = Utils.generateId();
+                    wrapper.dataset.rawText = text;
+                    
+                    actionsHtml = `
+                        <div class="message-actions">
+                            <button class="msg-action-btn" title="העתק הודעה" onclick="app.copyText(this.closest('.message-wrapper').dataset.rawText)">
+                                ${ICONS.copy}
+                            </button>
+                            <button class="msg-action-btn" title="הקרא הודעה" onclick="app.speakText(this.closest('.message-wrapper').dataset.rawText)">
+                                ${ICONS.play}
+                            </button>
+                        </div>
+                    `;
+                }
+
+                wrapper.innerHTML = `
+                    <div class="message">
+                        <div class="message-content">${htmlContent}</div>
+                        ${actionsHtml}
+                    </div>
+                `;
+                
+                if (isStreaming) {
+                    wrapper.id = 'streaming-message';
+                }
+
+                this.els.chatContainer.appendChild(wrapper);
+                this.scrollToBottom();
+                return wrapper;
+            }
+
+            scrollToBottom() {
+                this.els.chatContainer.scrollTo({
+                    top: this.els.chatContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+
+            // --- Actions ---
+
+            copyCode(code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    this.showToast('הקוד הועתק ללוח!');
+                }).catch(err => {
+                    console.error('Copy failed', err);
+                    this.showToast('שגיאה בהעתקה.', 'error');
+                });
+            }
+
+            copyText(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.showToast('הטקסט הועתק ללוח!');
+                }).catch(err => {
+                    this.showToast('שגיאה בהעתקה.', 'error');
+                });
+            }
+
+            speakText(text) {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel(); // Stop current
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'he-IL';
+                    window.speechSynthesis.speak(utterance);
+                    this.showToast('מקריא את התשובה...');
+                } else {
+                    this.showToast('דפדפן זה אינו תומך בהקראת טקסט.', 'error');
+                }
+            }
+
+            // --- API Integration (Gemini 3.1 Pro Preview) ---
+
+            async handleSend() {
+                if (!this.settings.apiKey) {
+                    this.showToast('יש להזין API Key בהגדרות.', 'error');
+                    this.openModal('settings-modal');
+                    return;
+                }
+
+                const text = this.els.messageInput.value.trim();
+                if (!text || this.isGenerating) return;
+
+                // 1. UI Update for User
+                this.els.messageInput.value = '';
+                this.autoResizeTextarea();
+                this.els.sendBtn.disabled = true;
+                
+                const chat = this.chats.find(c => c.id === this.currentChatId);
+                
+                // Set title if it's the first message
+                if (chat.messages.length === 0) {
+                    chat.title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+                    this.renderChatList();
+                    this.els.welcomeScreen.style.display = 'none';
+                }
+
+                // Add user message to state and UI
+                chat.messages.push({ role: 'user', content: text });
+                this.appendMessageToUI('user', text);
+                
+                this.isGenerating = true;
+                
+                // 2. Add Loading Indicator
+                const loadingWrapper = document.createElement('div');
+                loadingWrapper.className = 'message-wrapper bot';
+                loadingWrapper.id = 'loading-indicator';
+                loadingWrapper.innerHTML = `
+                    <div class="message" style="padding: 10px 15px;">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                `;
+                this.els.chatContainer.appendChild(loadingWrapper);
+                this.scrollToBottom();
+
+                // 3. Prepare Payload (Gemini API format)
+                const payload = this.buildGeminiPayload(chat.messages);
+
+                try {
+                    this.abortController = new AbortController();
+                    
+                    const response = await fetch(`${CONFIG.API_URL}?key=${this.settings.apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        signal: this.abortController.signal
+                    });
+
+                    document.getElementById('loading-indicator')?.remove();
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error?.message || `HTTP Error ${response.status}`);
+                    }
+
+                    // 4. Handle Streaming Response
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let botMessage = '';
+                    let streamingWrapper = this.appendMessageToUI('bot', '', true);
+                    const contentDiv = streamingWrapper.querySelector('.message-content');
+                    
+                    let buffer = '';
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, { stream: true });
+                        
+                        // Parse JSON stream chunks (Gemini specific array stream handling)
+                        // It sends chunks like: "[\n{\n\"candidates\": ...\n},\n{\n..."
+                        // We will extract text using regex for resilience in a browser UI
+                        
+                        const textMatches = [...buffer.matchAll(/"text"\s*:\s*"(*(?:\\.*)*)"/g)];
+                        
+                        if (textMatches.length > 0) {
+                            // Reconstruct the full text so far
+                            let currentFullText = '';
+                            textMatches.forEach(m => {
+                                // unescape JSON string
+                                try { currentFullText += JSON.parse(`"${m}"`); } 
+                                catch(e) { /* ignore partial */ }
+                            });
+                            
+                            if (currentFullText.length > botMessage.length) {
+                                botMessage = currentFullText;
+                                contentDiv.innerHTML = MarkdownParser.parse(botMessage);
+                                this.scrollToBottom();
+                            }
+                        }
+                    }
+
+                    // Finalize
+                    streamingWrapper.removeAttribute('id');
+                    streamingWrapper.dataset.rawText = botMessage;
+                    
+                    // Save to state
+                    chat.messages.push({ role: 'bot', content: botMessage });
+                    chat.updatedAt = Date.now();
+                    this.saveChats();
+                    
+                    // Add actions back (copy/play)
+                    const messageBox = streamingWrapper.querySelector('.message');
+                    messageBox.innerHTML += `
+                        <div class="message-actions">
+                            <button class="msg-action-btn" title="העתק הודעה" onclick="app.copyText(this.closest('.message-wrapper').dataset.rawText)">
+                                ${ICONS.copy}
+                            </button>
+                            <button class="msg-action-btn" title="הקרא הודעה" onclick="app.speakText(this.closest('.message-wrapper').dataset.rawText)">
+                                ${ICONS.play}
+                            </button>
+                        </div>
+                    `;
+
+                } catch (error) {
+                    document.getElementById('loading-indicator')?.remove();
+                    if (error.name !== 'AbortError') {
+                        console.error("API Error:", error);
+                        this.showToast(`שגיאה: ${error.message}`, 'error');
+                        // Add error message to chat
+                        this.appendMessageToUI('bot', `⚠️ אירעה שגיאה בתקשורת מול השרת:\n\`\`\`\n${error.message}\n\`\`\``);
+                    }
+                } finally {
+                    this.isGenerating = false;
+                    this.toggleSendButton();
+                    this.els.messageInput.focus();
+                }
+            }
+
+            buildGeminiPayload(messages) {
+                // Convert app format (user/bot) to Gemini format (user/model)
+                const contents = messages.map(msg => ({
+                    role: msg.role === 'bot' ? 'model' : 'user',
+                    parts:
+                }));
+
+                const payload = {
+                    contents: contents,
+                    generationConfig: {
+                        temperature: this.settings.temperature,
+                        topK: this.settings.topK,
+                        topP: this.settings.topP,
+                        maxOutputTokens: this.settings.maxOutputTokens
+                    },
+                    safetySettings:
+                };
+
+                // Add system instruction if exists
+                if (this.settings.systemInstruction) {
+                    payload.systemInstruction = {
+                        parts:
+                    };
+                }
+
+                return payload;
             }
         }
-    }
 
-    function playTick(tick, time) {
-        if(CONFIG.currentSectionIndex >= CONFIG.songStructure.length) return;
-        
-        const section = CONFIG.songStructure[CONFIG.currentSectionIndex];
-        const pattern = section.pattern;
-        
-        // Drums
-        if (pattern.kick && pattern.kick[tick]) CONFIG.instruments.kick.trigger(time);
-        if (pattern.snare && pattern.snare[tick]) CONFIG.instruments.snare.trigger(time);
-        if (pattern.hatClosed && pattern.hatClosed[tick]) CONFIG.instruments.hatClosed.trigger(time);
-        if (pattern.hatOpen && pattern.hatOpen[tick]) CONFIG.instruments.hatOpen.trigger(time);
-        
-        // Tonal
-        if (pattern.bass && pattern.bass[tick]) {
-            CONFIG.instruments.bass.trigger(pattern.bass[tick], time, 0.2, 1, Math.random()>0.7);
-        }
-        
-        if (pattern.lead && pattern.lead[tick]) {
-            CONFIG.instruments.lead.trigger(pattern.lead[tick], time, 0.3);
-        }
-        
-        if (pattern.pad && tick === 0) { // Pads play once per bar usually
-             CONFIG.instruments.pad.trigger(pattern.pad[0] || 440, time, 2.5); // Long chord
-        }
-    }
-
-    CONFIG.intervalId = setInterval(() => {
-        while (CONFIG.nextNoteTime < CONFIG.audioCtx.currentTime + lookahead) {
-            playTick(CONFIG.currentTick, CONFIG.nextNoteTime);
-            nextTick();
-        }
-    }, scheduleInterval);
-}
-
-// --- AI GENERATION ---
-
-async function generateTrack() {
-    const apiKey = document.getElementById('apiKey').value;
-    const prompt = document.getElementById('prompt').value;
-    
-    if(!apiKey) return alert('נא להכניס מפתח API');
-    
-    document.getElementById('loader').style.display = 'flex';
-    
-    // Prompt הנדסי מורכב ליצירת מבנה מלא
-    const systemInstruction = `
-    You are an expert Electronic Music Producer. 
-    Create a complete song structure JSON.
-    Output MUST be valid JSON only.
-    Structure: Array of sections (Intro, Buildup, Drop, Breakdown, Outro).
-    Each section has: "name", "bars" (duration), and "pattern" (16 steps array).
-    Frequencies in Hz.
-    Example schema:
-    [
-        {
-            "name": "Intro",
-            "bars": 4, 
-            "pattern": {
-                "kick": [1,0,0,0...],
-                "bass": [0,0,55,0...],
-                "pad": [220, 0... only index 0 needed for pad]
-            }
-        }
-    ]
-    Make it progressive. Build energy. Use scale D Minor or F Major.
-    `;
-
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: `Create a trance track: ${prompt}. BPM: 140.` }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] }
-            })
+        // Initialize App on Load
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new ChatApp();
         });
 
-        const data = await response.json();
-        let jsonText = data.candidates[0].content.parts[0].text;
-        // Clean markdown if present
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '');
-        
-        const songData = JSON.parse(jsonText);
-        
-        CONFIG.songStructure = songData;
-        CONFIG.bpm = 138; // Default or parsed
-        
-        log("Song structure generated successfully.");
-        startEngine();
-        
-    } catch (e) {
-        log("Error generating: " + e.message);
-        alert("שגיאה ביצירה. בדוק את ה-API Key או נסה שוב.");
-    } finally {
-        document.getElementById('loader').style.display = 'none';
-    }
-}
-
-function startEngine() {
-    if(!CONFIG.audioCtx) initAudio();
-    if(CONFIG.audioCtx.state === 'suspended') CONFIG.audioCtx.resume();
-    
-    CONFIG.isPlaying = true;
-    CONFIG.chunks = [];
-    CONFIG.nextNoteTime = CONFIG.audioCtx.currentTime + 0.5;
-    CONFIG.currentTick = 0;
-    CONFIG.currentSectionIndex = 0;
-    CONFIG.patternCursor = 0;
-    
-    CONFIG.recorder.start();
-    scheduler();
-    
-    document.getElementById('stopBtn').disabled = false;
-    document.getElementById('dlBtn').disabled = true;
-    log("Playback started.");
-}
-
-function stopEngine() {
-    clearInterval(CONFIG.intervalId);
-    if(CONFIG.recorder && CONFIG.recorder.state === 'recording') CONFIG.recorder.stop();
-    CONFIG.isPlaying = false;
-    
-    document.getElementById('stopBtn').disabled = true;
-    document.getElementById('dlBtn').disabled = false;
-    updateStatus("FINISHED");
-    log("Playback stopped. Audio ready for download.");
-}
-
-function downloadWav() {
-    const blob = new Blob(CONFIG.chunks, { 'type' : 'audio/wav; codecs=MS_PCM' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `AI_Trance_${Date.now()}.wav`;
-    a.click();
-}
-
-// --- UI & VISUALS ---
-
-function setupMixerUI() {
-    const rack = document.getElementById('mixerRack');
-    rack.innerHTML = '';
-    const channels = ['kick', 'snare', 'hats', 'bass', 'lead', 'pad'];
-    channels.forEach(ch => {
-        const div = document.createElement('div');
-        div.className = 'channel-strip';
-        div.id = `ch-${ch}`;
-        div.innerHTML = `
-            <div class="vu-meter"><div class="vu-level" id="vu-${ch}"></div></div>
-            <small>${ch.toUpperCase()}</small>
-        `;
-        rack.appendChild(div);
-    });
-}
-
-function animateChannel(ch) {
-    const el = document.getElementById(`ch-${ch}`);
-    const vu = document.getElementById(`vu-${ch}`);
-    if(el) {
-        el.classList.add('active');
-        vu.style.height = '100%';
-        setTimeout(() => {
-            el.classList.remove('active');
-            vu.style.height = '0%';
-        }, 100);
-    }
-}
-
-function drawVisualizer() {
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    
-    const bufferLength = CONFIG.analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    // Fixed Color (Neon Blue) - No CSS Var here to avoid errors
-    const color = '#00f2ff'; 
-
-    function render() {
-        if(!CONFIG.isPlaying) return requestAnimationFrame(render);
-        
-        requestAnimationFrame(render);
-        CONFIG.analyser.getByteFrequencyData(dataArray);
-        
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        const barWidth = (canvas.width / bufferLength) * 2.5;
-        let barHeight;
-        let x = 0;
-        
-        for(let i = 0; i < bufferLength; i++) {
-            barHeight = dataArray[i] / 255 * canvas.height;
-            
-            // Gradient fill
-            const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
-            gradient.addColorStop(0, color);
-            gradient.addColorStop(1, '#bc13fe'); // Purple top
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-            
-            x += barWidth + 1;
-        }
-    }
-    render();
-}
-
-// Init local storage for key
-window.onload = () => {
-    if(localStorage.getItem('gemini_key')) {
-        document.getElementById('apiKey').value = localStorage.getItem('gemini_key');
-    }
-    document.getElementById('apiKey').addEventListener('change', (e) => {
-        localStorage.setItem('gemini_key', e.target.value);
-    });
-};
-
-</script>
+    </script>
 </body>
 </html>
