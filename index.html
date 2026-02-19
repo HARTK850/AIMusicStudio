@@ -1413,29 +1413,31 @@
                 return `___CODE_BLOCK_${id}___`; 
                 });
 
-                // 2. Inline Code (`code`)
-                html = html.replace(/`(+)`/g, '<code>$1</code>');
+// 2. Inline Code (`code`) - הוספת נקודה וסימן שאלה
+html = html.replace(/`(.+?)`/g, '<code>$1</code>');
 
-                // 3. Bold (**text**)
-                html = html.replace(/\*\*(+)\*\*/g, '<strong>$1</strong>');
+// 3. Bold (**text**) - הוספת נקודה וסימן שאלה
+html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-                // 4. Italic (*text*)
-                html = html.replace(/\*(+)\*/g, '<em>$1</em>');
+// 4. Italic (*text*) - הוספת נקודה וסימן שאלה
+html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
 
-                // 5. Headers (# Header)
-                html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-                html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-                html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+// 5. Headers (# Header) - נשאר אותו דבר, זה תקין
+html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
-                // 6. Unordered Lists (- item)
-                html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
-                // Wrap lists
-                html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-                // Fix multiple uls if any (simple fix)
-                html = html.replace(/<\/ul>\n<ul>/g, '\n');
+// 6. Unordered Lists
+// מחליף שורות שמתחילות במינוס ב-li
+html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+// עוטף רצף של li בתוך ul אחד (שיפור ב-Regex)
+html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+// מנקה כפילויות של ul שנוצרו בטעות
+html = html.replace(/<\/ul>\s*<ul>/g, '');
 
-                // 7. Line Breaks
-                html = html.replace(/\n/g, '<br>');
+// 7. Line Breaks - תיקון כדי שלא יהיו רווחים כפולים אחרי תגיות בלוק
+html = html.replace(/\n/g, '<br>');
+html = html.replace(/<\/(h1|h2|h3|li|ul)><br>/g, '</$1>');
 
                 // 8. Restore Code Blocks with custom UI
                 codeBlocks.forEach(block => {
